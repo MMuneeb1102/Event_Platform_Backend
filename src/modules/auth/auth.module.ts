@@ -5,17 +5,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
 import { FirebaseModule } from 'src/firebase/firebase.module';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Module({
-  imports: [FirebaseModule,
-    ConfigModule.forRoot({isGlobal: true}),
+  imports: [
+    FirebaseModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
       secret: process.env.MY_SECRET_KEY,
       signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard],
-  exports: [AuthGuard, JwtModule]
+  providers: [AuthService, AuthGuard, FirebaseService],
+  exports: [AuthGuard, JwtModule],
 })
 export class AuthModule {}
