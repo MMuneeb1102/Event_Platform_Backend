@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import * as serviceAccount from './firebase-secret.json';
 
 @Injectable()
 export class FirebaseService {
