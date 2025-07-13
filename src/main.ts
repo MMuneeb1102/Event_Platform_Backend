@@ -17,7 +17,7 @@ async function bootstrap() {
   app.use(cookieParser())
 
   app.enableCors({
-    origin: ['https://event-coordination-client.vercel.app', "http://localhost:5173"],
+    origin: ['https://event-coordination-client.vercel.app', "http://localhost:5173", "https://fluffy-lollipop-94cfc5.netlify.app"],
     credentials: true,
   });
 
