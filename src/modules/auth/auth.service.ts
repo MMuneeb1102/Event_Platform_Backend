@@ -68,9 +68,9 @@ export class AuthService {
       const token = this.jwtService.sign(payload, { secret });
 
       res.cookie('token', token, {
-        httpOnly: false,
-        secure: true, 
-        sameSite: 'lax',
+        httpOnly: true,     
+        secure: true,           
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
 
@@ -117,11 +117,12 @@ export class AuthService {
       const token = this.jwtService.sign(data, { secret });
 
        res.cookie('token', token, {
-        httpOnly: false,
-        secure: true, 
-        sameSite: 'lax',
+        httpOnly: true,     
+        secure: true,           
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
+
 
       return {
         message: 'login successful',
