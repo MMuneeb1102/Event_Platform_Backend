@@ -18,7 +18,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: 'https://event-coordination-client.vercel.app',
-    credentials: false,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   });
 
