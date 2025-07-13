@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event';
 import { AuthGuard } from '../auth/auth.guard';
@@ -25,6 +25,7 @@ export class EventController {
     return this.eventService.addComment(addCommentDto, userId, eventId);
   
   }
+
   @Post('join-event/:eventId')
   @UseGuards(AuthGuard)
   async joinEvent(@Param('eventId') eventId: string, @Req() req: any) {
@@ -32,5 +33,30 @@ export class EventController {
 
     console.log(eventId);
     return this.eventService.joinEvent(eventId, userId);
+  }
+
+  @Get('getall')
+  @UseGuards(AuthGuard)
+  async getAllEvents() {
+    return this.eventService.getAllEvents();
+  }
+
+  @Get('get-event/:eventId')
+  @UseGuards(AuthGuard)
+  async getEventById(@Param('eventId') eventId: string) {
+    return this.eventService.getEventById(eventId);
+  }
+
+  @Get('myevents')
+  @UseGuards(AuthGuard)
+  async myEvents(@Req() req: any) {
+    const userId: string = req.user.id;
+    return this.eventService.myEvents(userId);
+  }
+
+  @Get('comments/getall/:eventId')
+  @UseGuards(AuthGuard)
+  async getAllComments(@Param('eventId') eventId: string) {
+    return this.eventService.getAllComments(eventId);
   }
 }

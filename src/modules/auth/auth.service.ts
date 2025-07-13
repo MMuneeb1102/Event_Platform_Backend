@@ -48,14 +48,17 @@ export class AuthService {
 
       const securePass = await hash(password, salt);
 
-      let newuser = await this.firestore.collection('users').add({
+      const userData = {
         _id: uuidv4(),
         name: name,
         email: email,
         password: securePass,
-      });
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      }
 
-      const userId = newuser.id;
+      await this.firestore.collection('users').doc(userData._id).set(userData);
+
+      const userId = userData._id;
       const payload = {
         id: userId,
       };
@@ -116,6 +119,37 @@ export class AuthService {
         throw error;
       }
       throw new InternalServerErrorException('Internal server error');
+    }
+  }
+
+  async getUser(userId: string): Promise<any> {
+    try {
+      const userDoc = await this.firestore.collection('users').doc(userId).get();
+
+      if (!userDoc.exists) {
+        throw new NotFoundException('User not found');
+      }
+
+      const userData = userDoc.data();
+
+      if (userData?.password) {
+      delete userData.password;
+    }
+
+      if (userData?.createdAt) {
+      delete userData.createdAt;
+    }
+
+    // if (userData?.createdAt?.toDate) {
+    //   userData.createdAt = userData.createdAt.toDate().toISOString();
+    // }
+
+      return {
+        ...userData
+      };
+    } catch (error) {
+      console.error('[getUser] Error:', error);
+      throw new InternalServerErrorException('Failed to fetch user');
     }
   }
 }

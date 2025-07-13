@@ -33,10 +33,9 @@ export class EventService {
       await this.firestore.collection('eventParticipants').doc(bodyData._id).set({
         _id: uuidv4(),
         eventId: bodyData._id,
-        userId: userId
+        userId: userId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-
-
 
       let responseMessage = {
         message: 'Event created successfully',
@@ -105,7 +104,6 @@ export class EventService {
         throw new NotFoundException('Event not found');
       }
 
-      // Step 2: Check if user already joined this event
       const existingParticipantSnap = await this.firestore
         .collection('eventParticipants')
         .where('eventId', '==', eventId)
@@ -117,7 +115,6 @@ export class EventService {
         throw new ConflictException('User already joined this event');
       }
 
-      // Step 3: Add participant
       const _id = uuidv4();
 
       await this.firestore.collection('eventParticipants').doc(_id).set({
@@ -131,7 +128,7 @@ export class EventService {
         message: 'User successfully joined the event',
         participantId: _id,
       };
-      
+
     } catch (error) {
       console.error('[joinEvent] Error:', error);
 
@@ -143,6 +140,98 @@ export class EventService {
       }
 
       throw new InternalServerErrorException('Failed to join event');
+    }
+  }
+
+  async getAllEvents(): Promise<any[]> {
+    try {
+      const snapshot = await this.firestore.collection('events').get();
+
+      let events: any[] = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.createdAt?.toDate) {
+          data.createdAt = data.createdAt.toDate().toISOString();
+        }
+        events.push(data);
+
+      });
+
+      return events;
+    } catch (error) {
+      console.error('[getAllEvents] Error:', error);
+      throw new InternalServerErrorException('Failed to fetch events');
+    }
+  }
+
+  async getEventById(eventId: string): Promise<any> {
+    try {
+      const doc = await this.firestore.collection('events').doc(eventId).get();
+
+      if (!doc.exists) {
+        throw new NotFoundException('Event not found');
+      }
+
+      const data = doc.data();
+
+      if (data?.createdAt?.toDate) {
+        data.createdAt = data.createdAt.toDate().toISOString();
+      }
+
+      return data
+    } catch (error) {
+      console.error('[getEventById] Error:', error);
+      throw new InternalServerErrorException('Failed to fetch event');
+    }
+  }
+
+  async myEvents(userId: string): Promise<any[]> {
+    try {
+      const snapshot = await this.firestore
+        .collection('events')
+        .where('userId', '==', userId)
+        .get();
+
+      const events: any[] = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        if (data.createdAt?.toDate) {
+          data.createdAt = data.createdAt.toDate().toISOString();
+        }
+
+        events.push(data);
+      });
+
+      return events;
+    } catch (error) {
+      console.error('[myEvents] Error:', error);
+      throw new InternalServerErrorException('Failed to fetch user events');
+    }
+  }
+
+  async getAllComments(eventId: string): Promise<any[]> {
+    try {
+      const snapshot = await this.firestore.collection('eventComments').where('eventId', '==', eventId).get();
+
+      const comments: any[] = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        if (data.createdAt?.toDate) {
+          data.createdAt = data.createdAt.toDate().toISOString();
+        }
+
+        comments.push(data);
+      });
+
+      return comments;
+    } catch (error) {
+      console.error('[getAllComments] Error:', error);
+      throw new InternalServerErrorException('Failed to fetch comments');
     }
   }
 }
