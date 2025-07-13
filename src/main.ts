@@ -16,13 +16,25 @@ async function bootstrap() {
 
   app.use(cookieParser())
 
-  app.enableCors({
-    origin: 'https://event-coordination-client.vercel.app',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-    allowedHeaders: 'Content-Type, Authorization',
+  const allowedOrigin = 'https://event-coordination-client.vercel.app';
+
+  // Manually handle CORS for all requests
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end(); // handle preflight
+    }
+
+    next();
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.init();
 }
 bootstrap();
