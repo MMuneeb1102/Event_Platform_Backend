@@ -19,7 +19,6 @@ async function bootstrap() {
   app.enableCors({
     origin: 'https://event-coordination-client.vercel.app',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   });
 
   await app.listen(process.env.PORT ?? 3000);
