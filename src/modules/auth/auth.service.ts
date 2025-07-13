@@ -67,12 +67,12 @@ export class AuthService {
 
       const token = this.jwtService.sign(payload, { secret });
 
-      res.cookie('token', token, {
-        httpOnly: false,     
-        secure: true,           
-        sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-      });
+      // res.cookie('token', token, {
+      //   httpOnly: false,     
+      //   secure: true,           
+      //   sameSite: 'none',
+      //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+      // });
 
       return {
         message: 'User created successfully!',
@@ -116,12 +116,12 @@ export class AuthService {
       const secret = await this.configService.get('MY_SECRET_KEY');
       const token = this.jwtService.sign(data, { secret });
 
-       res.cookie('token', token, {
-        httpOnly: false,     
-        secure: true,           
-        sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-      });
+      //  res.cookie('token', token, {
+      //   httpOnly: false,     
+      //   secure: true,           
+      //   sameSite: 'none',
+      //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+      // });
 
 
       return {
