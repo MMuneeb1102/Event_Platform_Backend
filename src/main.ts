@@ -17,7 +17,7 @@ async function bootstrap() {
   app.use(cookieParser())
 
   app.enableCors({
-    origin: 'https://event-coordination-client.vercel.app',
+    origin: ['https://event-coordination-client.vercel.app', "http://localhost:5173"],
     credentials: true,
   });
 
