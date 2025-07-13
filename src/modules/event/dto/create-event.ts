@@ -26,8 +26,4 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   location: string;
-
-  @IsArray()
-  @IsOptional()
-  participants: string[]; // user IDs
 }

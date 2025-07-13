@@ -17,7 +17,7 @@ export class EventService {
     userId: string,
   ) {
     try {
-      const { title, description, date, time } = createEventDto;
+      const { title, description, date, time, location } = createEventDto;
 
       let bodyData = {
         _id: uuidv4(),
@@ -25,13 +25,14 @@ export class EventService {
         description: description ? description : '',
         eventDate: date,
         time: time,
+        location: location,
         userId: userId,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       }
       await this.firestore.collection('events').doc(bodyData._id).set(bodyData);
 
       await this.firestore.collection('eventParticipants').doc(bodyData._id).set({
-        _id: uuidv4(),
+        _id: bodyData._id,
         eventId: bodyData._id,
         userId: userId,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -39,7 +40,7 @@ export class EventService {
 
       let responseMessage = {
         message: 'Event created successfully',
-        eventId: bodyData._id
+        ...bodyData
       }
 
       return responseMessage
@@ -73,28 +74,39 @@ export class EventService {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
-      console.log(commentData)
-
       await this.firestore
         .collection('eventComments')
         .doc(commentId)
         .set(commentData);
 
+      // 🔍 Fetch user's name from users collection
+      const userDoc = await this.firestore.collection('users').doc(userId).get();
+      let userName = 'Unknown';
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        if (userData?.name) {
+          userName = userData.name;
+        }
+      }
+
+      // ✅ Return full info
       return {
         message: 'Comment added successfully',
-        commentId,
+          _id: commentId,
+          comment: comment,
+          name: userName,
+          eventId: eventId,
       };
 
     } catch (error) {
-      if (
-        error instanceof NotFoundException
-      ) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
-
+      console.error('[addComment] Error:', error);
       throw new InternalServerErrorException('Failed to add comment');
     }
   }
+
 
   async joinEvent(eventId: string, userId: string): Promise<any> {
     try {
@@ -186,6 +198,7 @@ export class EventService {
     }
   }
 
+
   async myEvents(userId: string): Promise<any[]> {
     try {
       const snapshot = await this.firestore
@@ -214,19 +227,36 @@ export class EventService {
 
   async getAllComments(eventId: string): Promise<any[]> {
     try {
-      const snapshot = await this.firestore.collection('eventComments').where('eventId', '==', eventId).get();
+      const snapshot = await this.firestore
+        .collection('eventComments')
+        .where('eventId', '==', eventId)
+        .get();
 
       const comments: any[] = [];
 
-      snapshot.forEach(doc => {
+      for (const doc of snapshot.docs) {
         const data = doc.data();
 
         if (data.createdAt?.toDate) {
           data.createdAt = data.createdAt.toDate().toISOString();
         }
 
-        comments.push(data);
-      });
+        // 🔍 Get user name from userId
+        let userName = 'Unknown';
+        if (data.userId) {
+          const userDoc = await this.firestore.collection('users').doc(data.userId).get();
+          const userData = userDoc.data();
+          if (userData && userData.name) {
+            userName = userData.name;
+          }
+        }
+
+        comments.push({
+          id: doc.id,
+          ...data,
+          name: userName, // 👈 Attach user name
+        });
+      }
 
       return comments;
     } catch (error) {
@@ -234,4 +264,5 @@ export class EventService {
       throw new InternalServerErrorException('Failed to fetch comments');
     }
   }
+
 }

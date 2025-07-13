@@ -13,7 +13,7 @@ import { FirebaseService } from 'src/firebase/firebase.service';
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({
       secret: process.env.MY_SECRET_KEY,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '24h' },
     }),
   ],
   controllers: [AuthController],

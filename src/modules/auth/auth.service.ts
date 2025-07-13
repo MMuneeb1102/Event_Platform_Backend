@@ -26,7 +26,7 @@ export class AuthService {
     this.firestore = this.firebaseService.getFirestoreInstance();
   }
 
-  async signup(createUserDto: CreateUserDto) {
+  async signup(createUserDto: CreateUserDto, res: Response) {
     try {
       const { name, email, password, confirmPassword } = createUserDto;
 
@@ -67,6 +67,13 @@ export class AuthService {
 
       const token = this.jwtService.sign(payload, { secret });
 
+      res.cookie('token', token, {
+        httpOnly: false,
+        secure: false, 
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
+
       return {
         message: 'User created successfully!',
         token,
@@ -78,7 +85,7 @@ export class AuthService {
     }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto, res: Response) {
     try {
       const { email, password } = loginUserDto;
       const existingUserSnap = await this.firestore
@@ -108,6 +115,13 @@ export class AuthService {
 
       const secret = await this.configService.get('MY_SECRET_KEY');
       const token = this.jwtService.sign(data, { secret });
+
+       res.cookie('token', token, {
+        httpOnly: false,
+        secure: false, 
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
 
       return {
         message: 'login successful',
